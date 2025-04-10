@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>音声通話アプリ バックエンド工程表</title>
+  <style>
+    body { font-family: sans-serif; line-height: 1.6; padding: 20px; background: #f9f9f9; color: #333; }
+    h1, h2, h3 { color: #2c3e50; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #ecf0f1; }
+    code { background: #eee; padding: 2px 5px; border-radius: 4px; }
+    section { margin-bottom: 40px; }
+  </style>
+</head>
+<body>
+  <h1>🔧 バックエンド開発工程表（UUID + 合言葉ハッシュ認証）</h1>
+
+  <section>
+    <h2>🧱 1. 準備フェーズ</h2>
+    <h3>1.1 開発環境セットアップ</h3>
+    <ul>
+      <li>IDE: IntelliJ IDEA または Eclipse</li>
+      <li>JDK: Java 11+</li>
+      <li>フレームワーク: Spring Boot（最新版）</li>
+      <li>ビルドツール: Maven または Gradle</li>
+      <li>パッケージ構成:
+        <pre><code>/src/main/java/com/example/voip
+├── controller
+├── service
+├── config
+├── model
+└── storage</code></pre>
+      </li>
+    </ul>
+
+    <h3>1.2 依存関係の追加</h3>
+    <ul>
+      <li>spring-boot-starter-web</li>
+      <li>spring-boot-starter-websocket</li>
+      <li>lombok</li>
+      <li>devtools</li>
+      <li>commons-codec（SHA-256用）</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🧩 2. インメモリ構成とセッション管理</h2>
+    <ul>
+      <li>セッションを <code>ConcurrentHashMap&lt;String, SessionInfo&gt;</code> で管理</li>
+      <li>UUIDをキーとして使用し、ハッシュ合言葉や状態を保持</li>
+      <li>セッションの有効期間を設計（例: 5分）</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📡 3. シグナリングサーバー構築</h2>
+    <ul>
+      <li>WebSocket設定: <code>@EnableWebSocket</code> + <code>WebSocketConfig</code></li>
+      <li>エンドポイント: <code>/signal</code></li>
+      <li>WebSocketハンドラー: <code>SignalingHandler</code> を実装し、SDP・ICE候補の中継を担当</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🔐 4. 合言葉認証（JWTなし）</h2>
+    <ul>
+      <li>UUIDはクライアントで生成、サーバー側ではリプレイ防止に利用</li>
+      <li>合言葉をSHA-256でハッシュ化し、サーバーへ送信して照合</li>
+      <li>REST API:
+        <ul>
+          <li><code>/session/create</code>：UUID生成 + 合言葉ハッシュ保存</li>
+          <li><code>/session/join</code>：UUID + ハッシュ一致で認証</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🧪 5. テスト & デバッグ</h2>
+    <ul>
+      <li>JUnitによる単体テスト（UUID認証・ハッシュ照合など）</li>
+      <li>ブラウザ2つ（またはスマホ+PC）で通話テスト</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🚀 6. 公開・動作確認</h2>
+    <ul>
+      <li>Cloudflare Tunnelを利用してローカルPCのポートをHTTPSで公開</li>
+      <li>スマホなどから公開URLにアクセスしテスト</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🔄 7. メンテナンス・運用</h2>
+    <ul>
+      <li>セッションの有効期限を定期チェックして削除</li>
+      <li>使用済みUUIDの即時削除でリプレイ防止</li>
+      <li>Redis導入などで拡張性を確保（必要に応じて）</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📆 スケジュール例</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>期間</th>
+          <th>工程内容</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1週目</td>
+          <td>開発環境構築・依存関係・ディレクトリ設計</td>
+        </tr>
+        <tr>
+          <td>2〜3週目</td>
+          <td>WebSocket + シグナリング + UUID認証開発</td>
+        </tr>
+        <tr>
+          <td>4週目</td>
+          <td>テスト・Cloudflare Tunnel経由の公開テスト</td>
+        </tr>
+        <tr>
+          <td>5週目以降</td>
+          <td>パフォーマンス改善・セッションの保守処理</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>
